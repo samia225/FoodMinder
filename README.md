@@ -1,1 +1,1 @@
-# GrocerryBuddy
+# FoodMinder
