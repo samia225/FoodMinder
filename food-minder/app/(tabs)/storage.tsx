@@ -39,7 +39,7 @@ const Card: React.FC<{ emoji: string; name: string; expiryDate: string; onPress:
 }) => (
   <TouchableOpacity style={styles.card} onPress={onPress}>
     <Text style={styles.emoji}>{emoji}</Text>
-    <Text style={styles.foodName}>{name}</Text>
+    <Text style={styles.foodName} numberOfLines={1}>{name}</Text>
     <Text style={styles.expiryDate}>Expires: {expiryDate}</Text>
   </TouchableOpacity>
 );
@@ -285,13 +285,17 @@ safeContainer: {
     marginBottom: 5,
   },
   foodName: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: "bold",
+    width: "100%",
+    textAlign: "center",
   },
   expiryDate: {
-    fontSize: 14,
+    fontSize: 12,
     color: "red",
     marginTop: 5,
+    width: "100%",
+    textAlign: "center",
   },
   floatingButton: {
     position: "absolute",
@@ -320,10 +324,15 @@ safeContainer: {
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modal: {
-    backgroundColor: "white",
-    width: "80%",
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
+    width: "100%",
+    maxWidth: "90%",
+    alignItems: "center",
+    position: "relative",
+    // Remove fixed height to allow modal to expand
+    height: 'auto',
   },
   checkmarkContainer: {
     position: "absolute",

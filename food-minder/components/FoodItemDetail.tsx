@@ -82,20 +82,15 @@ const FoodItemDetail: React.FC<FoodItemDetailProps> = ({ foodItem, onClose, onCo
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    position: "relative",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
   modal: {
     backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    width: "100%",
+    width: 300,
+    maxWidth: "100%",
     alignItems: "center",
     position: "relative",
   },
@@ -106,11 +101,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginVertical: 10,
+    width: "100%",
+    textAlign: "center",
   },
   expiryDateLabel: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
+    width: "100%",
+    textAlign: "center",
   },
   expiryDate: {
     fontSize: 16,
