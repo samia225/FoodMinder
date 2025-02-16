@@ -1,144 +1,236 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, FlatList, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, FlatList, StyleSheet, TextInput, TouchableOpacity, Modal, Button, Animated, SafeAreaView} from "react-native";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import FoodItemDetail from "../../components/FoodItemDetail"; // Import the new component
 
 // Define food item type
 type FoodItem = {
   id: string;
   emoji: string;
   name: string;
+  price: number;
   expiryDate: string;
+  visible?: boolean; // Optional field for visibility
 };
 
-// Sample data
-const data: FoodItem[] = [
-    { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-17" }, // 1 day left
-    { id: "2", emoji: "🥦", name: "Broccoli", expiryDate: "2025-02-18" }, // 2 days left
-    { id: "3", emoji: "🥛", name: "Milk", expiryDate: "2025-02-19" }, // 3+ days left
-    { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-17" }, // 1 day left
-    { id: "5", emoji: "🍗", name: "Chicken", expiryDate: "2025-02-20" }, // 3+ days left
-    { id: "6", emoji: "🍌", name: "Banana", expiryDate: "2025-02-18" }, // 2 days left
-    { id: "7", emoji: "🥕", name: "Carrot", expiryDate: "2025-02-21" }, // 3+ days left
-    { id: "8", emoji: "🍇", name: "Grapes", expiryDate: "2025-02-22" }, // 3+ days left
-    { id: "9", emoji: "🥚", name: "Eggs", expiryDate: "2025-02-25" }, // 3+ days left
-    { id: "10", emoji: "🍊", name: "Orange", expiryDate: "2025-02-19" }, // 3+ days left
-    { id: "11", emoji: "🥩", name: "Beef", expiryDate: "2025-02-20" }, // 3+ days left
-    { id: "12", emoji: "🧀", name: "Cheese", expiryDate: "2025-02-28" }, // 3+ days left
-    { id: "13", emoji: "🍉", name: "Watermelon", expiryDate: "2025-02-26" }, // 3+ days left
-  ];
-  
+// Sample data with visible field
+const initialData: FoodItem[] = [
+  { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-17", price: 1.2, visible: true },
+  { id: "2", emoji: "🥦", name: "Broccoli", expiryDate: "2025-02-18", price: 2.5, visible: true },
+  { id: "3", emoji: "🥛", name: "Milk", expiryDate: "2025-02-19", price: 1.8, visible: true },
+  { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-17", price: 2.0, visible: true },
+  { id: "5", emoji: "🍗", name: "Chicken", expiryDate: "2025-02-20", price: 5.0, visible: true },
+  { id: "6", emoji: "🍌", name: "Banana", expiryDate: "2025-02-18", price: 1.1, visible: true },
+  { id: "7", emoji: "🥕", name: "Carrot", expiryDate: "2025-02-21", price: 1.3, visible: true },
+  { id: "8", emoji: "🍇", name: "Grapes", expiryDate: "2025-02-22", price: 3.0, visible: true },
+  { id: "9", emoji: "🥚", name: "Eggs", expiryDate: "2025-02-25", price: 2.5, visible: true },
+  { id: "10", emoji: "🍊", name: "Orange", expiryDate: "2025-02-19", price: 1.4, visible: true },
+  { id: "11", emoji: "🥩", name: "Beef", expiryDate: "2025-02-20", price: 6.0, visible: true },
+  { id: "12", emoji: "🧀", name: "Cheese", expiryDate: "2025-02-28", price: 4.5, visible: true },
+  { id: "13", emoji: "🍉", name: "Watermelon", expiryDate: "2025-02-26", price: 5.5, visible: true },
+];
 
 // Card Component
-const Card: React.FC<{ emoji: string; name: string; expiryDate: string }> = ({
+const Card: React.FC<{ emoji: string; name: string; expiryDate: string; onPress: () => void }> = ({
   emoji,
   name,
   expiryDate,
+  onPress,
 }) => (
-  <View style={styles.card}>
+  <TouchableOpacity style={styles.card} onPress={onPress}>
     <Text style={styles.emoji}>{emoji}</Text>
     <Text style={styles.foodName}>{name}</Text>
     <Text style={styles.expiryDate}>Expires: {expiryDate}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 // Main Card Screen
 const CardScreen: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+    const [data, setData] = useState<FoodItem[]>(initialData);
+    
+    const [checkmarkVisible, setCheckmarkVisible] = useState(false); // State to control checkmark visibility
+    const [checkmarkAnim] = useState(new Animated.Value(0)); // Animated value for the checkmark
+  
+    const getDaysLeft = (expiryDate: string) => {
+      const today = new Date();
+      const expiry = new Date(expiryDate);
+      const difference = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return difference;
+    };
+  
+    const sortedData = [...data]
+      .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      .sort((a, b) => getDaysLeft(a.expiryDate) - getDaysLeft(b.expiryDate));
+  
+    const items1Day = sortedData.filter((item) => getDaysLeft(item.expiryDate) === 1 && item.visible);
+    const items2Days = sortedData.filter((item) => getDaysLeft(item.expiryDate) === 2 && item.visible);
+    const items3OrMore = sortedData.filter((item) => getDaysLeft(item.expiryDate) >= 3 && item.visible);
+  
+    const openCamera = () => {
+      launchCamera({ mediaType: "photo" }, (response) => {
+        if (response.assets) {
+          console.log(response.assets[0].uri);
+        }
+      });
+    };
+  
+    const openGallery = () => {
+      launchImageLibrary({ mediaType: "photo" }, (response) => {
+        if (response.assets) {
+          console.log(response.assets[0].uri);
+        }
+      });
+    };
+  
+    const handleCardPress = (food: FoodItem) => {
+      setSelectedFood(food);
+    };
+  
+    const handleCloseModal = () => {
+      setSelectedFood(null);
+    };
 
-  // Helper function to get remaining days
-  const getDaysLeft = (expiryDate: string) => {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
-    const difference = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return difference;
-  };
+    const handleFinishModal = () => {
+        setSelectedFood(null);
+        animateCheckmark(); // Trigger the checkmark animation when closing the modal
+      };
 
-  // Filter and sort data
-  const sortedData = [...data]
-    .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => getDaysLeft(a.expiryDate) - getDaysLeft(b.expiryDate));
-
-  // Categorize items
-  const items1Day = sortedData.filter((item) => getDaysLeft(item.expiryDate) === 1);
-  const items2Days = sortedData.filter((item) => getDaysLeft(item.expiryDate) === 2);
-  const items3OrMore = sortedData.filter((item) => getDaysLeft(item.expiryDate) >= 3);
-
-  // Function to handle camera button press
-  const openCamera = () => {
-    launchCamera({ mediaType: "photo" }, (response) => {
-      if (response.assets) {
-        console.log(response.assets[0].uri);
+    const handleSaveFoodItem = (updatedFood: FoodItem) => {
+        setData((prevData) =>
+          prevData.map((item) => (item.id === updatedFood.id ? updatedFood : item))
+        );
+        setSelectedFood(null);
+      };
+      
+  
+    const animateCheckmark = () => {
+      setCheckmarkVisible(true);
+      Animated.timing(checkmarkAnim, {
+        toValue: 1, // Fade in
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        // After animation completes, reset checkmark visibility
+        setTimeout(() => {
+          setCheckmarkVisible(false);
+          checkmarkAnim.setValue(0); // Reset the animation value
+        }, 1000); // Keep the checkmark visible for 1 second
+      });
+    };
+  
+    const handleConsumed = () => {
+      if (selectedFood) {
+        const updatedData = data.map((item) =>
+          item.id === selectedFood.id ? { ...item, visible: false } : item
+        );
+        setData(updatedData);
+        console.log("Food item consumed");
       }
-    });
-  };
-
-  // Function to handle gallery button press
-  const openGallery = () => {
-    launchImageLibrary({ mediaType: "photo" }, (response) => {
-      if (response.assets) {
-        console.log(response.assets[0].uri);
+      handleFinishModal();
+    };
+  
+    const handleDisposed = () => {
+      if (selectedFood) {
+        const updatedData = data.map((item) =>
+          item.id === selectedFood.id ? { ...item, visible: false } : item
+        );
+        setData(updatedData);
+        console.log("Food item disposed");
       }
-    });
-  };
+      handleFinishModal();
+    };
+  
+    return (
 
-  return (
     <View style={styles.container}>
-      {/* Search Bar */}
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search for food..."
-        value={searchQuery}
-        onChangeText={(text) => setSearchQuery(text)}
-      />
-
-    <ScrollView contentContainerStyle={{ padding: 5 }}>
-      {/* Section - 1 Day Left */}
-      {items1Day.length > 0 && <Text style={styles.sectionHeader}>1 Day Left</Text>}
-      <FlatList
-        data={items1Day}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} />
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search in your storage..."
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
+  
+        <ScrollView contentContainerStyle={{ padding: 5 }}>
+          {items1Day.length > 0 && <Text style={styles.sectionHeader}>1 Day Left</Text>}
+          <FlatList
+            data={items1Day}
+            keyExtractor={(item) => item.id}
+            numColumns={3}
+            renderItem={({ item }) => (
+              <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} onPress={() => handleCardPress(item)} />
+            )}
+            contentContainerStyle={styles.listContainer}
+            scrollEnabled={false}
+          />
+  
+          {items2Days.length > 0 && <Text style={styles.sectionHeader}>2 Days Left</Text>}
+          <FlatList
+            data={items2Days}
+            keyExtractor={(item) => item.id}
+            numColumns={3}
+            renderItem={({ item }) => (
+              <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} onPress={() => handleCardPress(item)} />
+            )}
+            contentContainerStyle={styles.listContainer}
+            scrollEnabled={false}
+          />
+  
+          {items3OrMore.length > 0 && <Text style={styles.sectionHeader}>3+ Days Left</Text>}
+          <FlatList
+            data={items3OrMore}
+            keyExtractor={(item) => item.id}
+            numColumns={3}
+            renderItem={({ item }) => (
+              <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} onPress={() => handleCardPress(item)} />
+            )}
+            contentContainerStyle={styles.listContainer}
+            scrollEnabled={false}
+          />
+        </ScrollView>
+  
+        <TouchableOpacity style={styles.floatingButton} onPress={openCamera}>
+          <Text style={styles.floatingButtonText}>⌞ ⌝</Text>
+        </TouchableOpacity>
+  
+        {selectedFood && (
+          <Modal visible={true} transparent={true} animationType="fade">
+            <View style={styles.modalContainer}>
+              <View style={styles.modal}>
+                {selectedFood && (
+                  <FoodItemDetail
+                    foodItem={selectedFood}
+                    onClose={handleCloseModal}
+                    onConsumed={handleConsumed}
+                    onDisposed={handleDisposed}
+                    onSave={handleSaveFoodItem} 
+                  />
+                )}
+              </View>
+            </View>
+          </Modal>
         )}
-        contentContainerStyle={styles.listContainer}
-        scrollEnabled={false}
-      />
-
-      {/* Section - 2 Days Left */}
-      {items2Days.length > 0 && <Text style={styles.sectionHeader}>2 Days Left</Text>}
-      <FlatList
-        data={items2Days}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} />
+  
+        {/* Checkmark Animation */}
+        {checkmarkVisible && (
+          <Animated.View
+            style={[
+              styles.checkmarkContainer,
+              {
+                opacity: checkmarkAnim,
+                transform: [{ scale: checkmarkAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.checkmark}> ✔️</Text>
+            <Text >Finished</Text> 
+          </Animated.View>
         )}
-        contentContainerStyle={styles.listContainer}
-        scrollEnabled={false}
-      />
-
-      {/* Section - 3 or More Days Left */}
-      {items3OrMore.length > 0 && <Text style={styles.sectionHeader}>3+ Days Left</Text>}
-      <FlatList
-        data={items3OrMore}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} />
-        )}
-        contentContainerStyle={styles.listContainer}
-        scrollEnabled={false}
-      />
-
-    </ScrollView>
-    {/* Floating Action Button for Camera */}
-    <TouchableOpacity style={styles.floatingButton} onPress={openCamera}>
-        <Text style={styles.floatingButtonText}>⌞ ⌝</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+      </View>
+    );
+  };
+  
 
 export default CardScreen;
 
@@ -169,7 +261,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   card: {
-    width: "30%", // Set to about 1/3 of the container width for 3 items per row
+    width: "30%", 
     margin: 5,
     height: 120,
     backgroundColor: "#f8f9fa",
@@ -203,13 +295,39 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     backgroundColor: "#B1C29E",
-    borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
     elevation: 5,
   },
   floatingButtonText: {
-    fontSize: 30,
-    color: "#fff",
+    fontSize: 28,
+    color: "white",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modal: {
+    backgroundColor: "white",
+    width: "80%",
+    padding: 20,
+    borderRadius: 10,
+  },
+  checkmarkContainer: {
+    position: "absolute",
+    top: "5%",
+    left: "45%",
+    zIndex: 999,
+  },
+  checkmark: {
+    fontSize: 40,
+    color: "green",
   },
 });
