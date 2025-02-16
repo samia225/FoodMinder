@@ -3,18 +3,31 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth } from "./contexts/auth";
 import LoginScreen from "./auth/LoginScreen";
 import SignUpScreen from "./auth/SignUpScreen";
-import TabNavigator from "./(tabs)";
+import TabLayout from "./(tabs)/_layout";
 
 const Stack = createStackNavigator();
 
 const Navigation = () => {
   const { user } = useAuth();
-  console.log('Current user state:', user); // For debugging
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: false,
+        cardStyle: { backgroundColor: 'transparent' },
+        presentation: 'card'
+      }}
+    >
       {user ? (
-        <Stack.Screen name="(tabs)" component={TabNavigator} />
+        <Stack.Screen 
+          name="(tabs)" 
+          component={TabLayout}
+          options={{
+            headerShown: false,
+            cardStyle: { backgroundColor: 'transparent' },
+            headerStyle: { display: 'none' },
+          }}
+        />
       ) : (
         <>
           <Stack.Screen 
