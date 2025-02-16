@@ -143,7 +143,7 @@ const CardScreen: React.FC = () => {
     };
   
     return (
-
+<SafeAreaView style={styles.safeContainer}>
     <View style={styles.container}>
         <TextInput
           style={styles.searchBar}
@@ -228,6 +228,7 @@ const CardScreen: React.FC = () => {
           </Animated.View>
         )}
       </View>
+      </SafeAreaView>
     );
   };
   
@@ -236,6 +237,10 @@ export default CardScreen;
 
 // Styles
 const styles = StyleSheet.create({
+safeContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    },
   container: {
     flex: 1,
     padding: 10,
@@ -258,7 +263,7 @@ const styles = StyleSheet.create({
     color: "#444",
   },
   listContainer: {
-    paddingBottom: 10,
+    paddingBottom: 40,
   },
   card: {
     width: "30%", 
@@ -290,7 +295,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: "absolute",
-    bottom: 20,
+    bottom: 60,
     right: 20,
     width: 60,
     height: 60,
