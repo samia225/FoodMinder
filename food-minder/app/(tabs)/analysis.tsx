@@ -34,6 +34,7 @@ const pieChartData = [
 ];
 
 const totalFoodExpenditure = pieChartData.reduce((sum, item) => sum + item.population, 0);
+const wastedFoodAmount = 85; 
 
 const chartConfig = {
   backgroundColor: 'transparent',
@@ -52,7 +53,8 @@ const chartConfig = {
   },
   propsForLabels: {
     fontSize: 12,
-  }
+  },
+  fromZero: true,
 };
 
 const PAGES = [
@@ -111,7 +113,12 @@ const AnalysisScreen = () => {
         <Text style={styles.totalText}>Total Expenditure</Text>
         <Text style={styles.totalValue}>${totalFoodExpenditure}</Text>
       </View>
+      <View style={styles.wastedContainer}>
+        <Text style={styles.wastedText}>Wasted Food Amount</Text>
+        <Text style={styles.wastedValue}>${wastedFoodAmount}</Text>
+      </View>
     </View>
+
   );
 
   return (
@@ -319,6 +326,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333333',
+  },
+  wastedContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 16,
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+    paddingHorizontal: 8,
+  },
+  wastedText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF6B6B', // A reddish color to indicate waste
+  },
+  wastedValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF6B6B',
   }
 });
 
