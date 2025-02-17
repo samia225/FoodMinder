@@ -19,7 +19,7 @@ function RootLayoutNav() {
     if (!user) {
       router.replace('/auth/LoginScreen'); // Changed from LoginScreen to match Screen name
     } else {
-      router.replace('/storage'); // Changed from /(tabs) to direct tab route
+      router.replace('/Dashboard'); // Changed from /(tabs) to direct tab route
     }
   }, [user]);
 
