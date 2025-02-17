@@ -29,11 +29,18 @@ export default function TabLayout() {
           },
         }),
       }}>
+        <Tabs.Screen
+        name="Dashboard"
+        options={{
+          title: 'Dashboard',
+          tabBarIcon: ({ color }) => <FontAwesome6 name="house" size={24} color="gray" />,
+        }}
+      /> 
       <Tabs.Screen
         name="storage"
         options={{
           title: 'Groceries',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="archivebox.fill" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome6 name="cart-shopping" size={24} color="gray" />,
         }}
       /> 
       <Tabs.Screen
@@ -47,7 +54,7 @@ export default function TabLayout() {
         name="analysis"
         options={{
           title: 'Analysis',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="archivebox.fill" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome6 name="chart-simple" size={24} color="gray" />,
         }}
       /> 
     </Tabs>

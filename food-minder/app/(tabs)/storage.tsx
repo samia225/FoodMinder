@@ -469,12 +469,12 @@ export default CardScreen;
 const styles = StyleSheet.create({
 safeContainer: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#FADA7A",
     },
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#FCE7C8",
+    backgroundColor: "#FADA7A",
   },
   searchContainer: {
     flexDirection: 'row',        // Aligns items horizontally
