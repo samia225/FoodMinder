@@ -1,17 +1,32 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import { Avatar } from "react-native-paper";
-import { SafeAreaView } from "react-native";
 import ItemList from "@/components/ItemList";
 
 const Dashboard: React.FC = () => {
-  const userName: string = "Mike"; 
-  const remainingBudget: string = "$120.50"; 
-  const [items, setItems] = useState<string[]>(["Milk", "Bread", "Cheese"]);
+  const userName: string = "Mike";
+  const remainingBudget: string = "$120.50";
 
-  const addItem = () => {
-    setItems([...items, `Item ${items.length + 1}`]);
-  };
+  // Expiring Food Items
+  const [expiringItems, setExpiringItems] = useState([
+    { id: "1", emoji: "🥛", name: "Milk" },
+    { id: "2", emoji: "🍞", name: "Bread" },
+    { id: "3", emoji: "🧀", name: "Cheese" },
+    { id: "4", emoji: "🍎", name: "Apple" },
+    { id: "5", emoji: "🥚", name: "Eggs" },
+    { id: "6", emoji: "🥕", name: "Carrot" },
+    { id: "7", emoji: "🍌", name: "Banana" },
+  ]);
+
+  // Past Recipes
+  const [pastRecipes, setPastRecipes] = useState([
+    { id: "1", emoji: "🍕", name: "Pizza" },
+    { id: "2", emoji: "🥗", name: "Salad" },
+    { id: "3", emoji: "🍜", name: "Ramen" },
+    { id: "4", emoji: "🍔", name: "Burger" },
+    { id: "5", emoji: "🍲", name: "Soup" },
+    { id: "6", emoji: "🌮", name: "Tacos" },
+  ]);
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -25,10 +40,18 @@ const Dashboard: React.FC = () => {
         </View>
 
         {/* Expiring Items Section */}
-        <ItemList items={items} addItem={addItem} />
+        <Text style={styles.sectionTitle}>Expiring Items</Text>
+        <ItemList items={expiringItems} />
 
-        {/* Remaining Budget */}
-        <Text style={styles.budgetText}>Remaining Budget: {remainingBudget}</Text>
+        {/* Past Recipes Section */}
+        <Text style={styles.sectionTitle}>Past Recipes</Text>
+        <ItemList items={pastRecipes} />
+
+        {/* Remaining Budget Section */}
+        <View style={styles.budgetContainer}>
+          <Text style={styles.budgetText}>Remaining Budget</Text>
+          <Text style={styles.budgetAmount}>{remainingBudget}</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -56,11 +79,32 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  budgetContainer: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   budgetText: {
     fontSize: 18,
     fontWeight: "bold",
-    marginTop: 20,
-    textAlign: "center",
+  },
+  budgetAmount: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#4CAF50",
+    marginTop: 5,
   },
 });
 
