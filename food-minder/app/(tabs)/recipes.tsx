@@ -280,7 +280,7 @@ export default function RecipeScreen() {
         style={styles.header}
       >
         <Text style={styles.title}>Recipe Generator</Text>
-        <Text style={styles.subtitle}>Discover delicious meals</Text>
+        <Text style={styles.subtitle}>Discover delicious meals!</Text>
         
         {/* Search Bar */}
         <View style={styles.searchContainer}>
@@ -388,11 +388,6 @@ export default function RecipeScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Generate Button */}
-      <TouchableOpacity style={styles.generateButton}>
-        <Text style={styles.generateButtonText}>Generate Recipe</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
