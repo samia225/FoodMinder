@@ -145,13 +145,18 @@ const CardScreen: React.FC = () => {
     return (
 <SafeAreaView style={styles.safeContainer}>
     <View style={styles.container}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search in your storage..."
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-        />
-  
+
+        <View style={styles.searchContainer}>
+            {/* Search Icon */}
+            <Text style={styles.searchText}>🔎</Text>
+
+            <TextInput
+                style={styles.searchBar}
+                placeholder="Search in your storage..."
+                value={searchQuery}
+                onChangeText={(text) => setSearchQuery(text)}
+            />
+        </View>
         <ScrollView contentContainerStyle={{ padding: 5 }}>
           {items1Day.length > 0 && <Text style={styles.sectionHeader}>1 Day Left</Text>}
           <FlatList
@@ -246,6 +251,17 @@ safeContainer: {
     padding: 10,
     backgroundColor: "#FCE7C8",
   },
+  searchContainer: {
+    flexDirection: 'row',        // Aligns items horizontally
+    alignItems: 'center',        // Centers the items vertically within the row
+    justifyContent: 'center',     // Optional: Centers the whole container
+  },
+  searchText:{
+    position:"relative",
+    height: 40,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
   searchBar: {
     height: 40,
     borderColor: "#F0A04B",
@@ -253,6 +269,7 @@ safeContainer: {
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 10,
+    width:"80%"
   },
   sectionHeader: {
     fontSize: 18,
@@ -343,5 +360,5 @@ safeContainer: {
   checkmark: {
     fontSize: 40,
     color: "green",
-  },
+  }
 });
