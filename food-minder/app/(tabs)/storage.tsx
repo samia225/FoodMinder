@@ -3,7 +3,11 @@ import { View, Text, ScrollView, FlatList, StyleSheet, TextInput, TouchableOpaci
 //import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system"; // Import for FileSystem to read file as Base64
 import FoodItemDetail from "../../components/FoodItemDetail"; // Import the new component
+import * as ImageManipulator from 'expo-image-manipulator';
+import {Alert} from 'react-native';
+
 
 // Define food item type
 type FoodItem = {
@@ -51,10 +55,16 @@ const CardScreen: React.FC = () => {
 
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const [cameraOpen, setCameraOpen] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string>("");
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
     const [data, setData] = useState<FoodItem[]>(initialData);
+
+    const genimiAPIKey = "AIzaSyDENZrKT6lMsJid51Xh19GpSF3iQOrZjHU";
+
+
+    const [extractedText, setExtractedText] = useState('');
+    const [loading, setLoading] = useState(false);
     
     const [checkmarkVisible, setCheckmarkVisible] = useState(false); // State to control checkmark visibility
     const [checkmarkAnim] = useState(new Animated.Value(0)); // Animated value for the checkmark
@@ -99,22 +109,120 @@ const CardScreen: React.FC = () => {
         if (!result.canceled) {
           setSelectedImage(result.assets[0].uri);
           console.log(result.assets[0].uri);
+          const compressed_uri = await compressImageToSize(result.assets[0].uri);
+          if (compressed_uri){
+            processImage(compressed_uri);
+          }
+          console.log("problem compressing the image");
         }
       };
+
+      const processImage = async (uri: string) => {
+        setLoading(true);
+        const base64Image = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          const base64 = "data:image/jpg;base64,"+base64Image;
+          console.log(base64.slice(0, 100));
+          let formData = new FormData();
+          formData.append('base64Image', base64); // Use base64 encoded image string
+          formData.append('apikey', 'K84984960388957');
     
-      const openGallery = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: 'images',
-          allowsEditing: true,
-          quality: 1,
-        });
-    
-        if (!result.canceled) {
-          setSelectedImage(result.assets[0].uri);
-          console.log(result.assets[0].uri);
+        try {
+          let response = await fetch('https://api.ocr.space/parse/image', {
+            method: 'POST',
+            body: formData,
+          });
+          let result = await response.json();
+            console.log(result);
+          console.log(result.ParsedResults[0].ParsedText);
+          setExtractedText(result.ParsedResults[0].ParsedText);
+          console.log(result.ParsedResults[0].ParsedText);
+          await callGeminiAPI(result.ParsedResults[0].ParsedText);
+
+        } catch (error) {
+          console.error(error);
+        }
+        setLoading(false);
+      };
+
+      const callGeminiAPI = async (text: string) => {
+        try{
+        // Construct the API request body based on the format you shared
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+        const genAI = new GoogleGenerativeAI(genimiAPIKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        console.log(text);
+        
+        const prompt = 'here is receipt text: "' + text + '", please only return a list of dicionary in this format ["id": an number starting from 15(cannot be the same across all the items, "emoji": find a item emoji that is similar to the item(emoji needs to be enclosed in double quote) (it cannot be a word, if cannot find a emoji, put 🥣 as default emoji),"name": item_name, "expiryDate": estimated_expiry_date based on the item using general knowledge in the format of yyyy-mm-dd from 2025-02-16, "price": price_from the extracted text, "visible": true}';
+        
+        const result = await model.generateContent(prompt);
+        console.log(result.response.text());
+        text = result.response.text();
+        if (text){
+            const match = text.match(/```json([\s\S]*?)```/);
+            if (match && match[1]) {
+                const jsonData = match[1];
+                const data = JSON.parse(jsonData);
+                console.log(data);
+                setData((prevData) => [...prevData, ...data]);
+            }
+        }
+        }
+      
+        catch (error) {
+          console.error("Error calling Gemini API:", error);
         }
       };
-    
+
+      const compressImageToSize = async (uri: string) => {
+        try {
+          console.log("Resizing image with URI:", uri);
+          const result = await ImageManipulator.manipulateAsync(
+            uri,
+            [{ resize: { width: 800, height: 600 } }],
+            { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          console.log(result);
+          let fileSize = await getFileSize(result.uri);
+      
+          // Check if the image is under 1024 KB
+          while (fileSize > 1024 * 1024) {  // 1024 KB is 1 MB
+            const quality = Math.max(10, Math.floor(80 * (1024 * 1024 / fileSize))); // Reduce quality dynamically
+            const newResult = await ImageManipulator.manipulateAsync(
+              result.uri,
+              [{ resize: { width: 800, height: 600 } }],
+              { compress: quality / 100, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            result.uri = newResult.uri;
+            fileSize = await getFileSize(result.uri);
+          }
+      
+          console.log('Compressed Image URI:', result.uri);
+          return result.uri;
+        } catch (err) {
+          console.error('Error while resizing image:', err);
+          Alert.alert('Error', 'Failed to compress image');
+        }
+      };
+      
+      // Function to get the file size of an image
+      const getFileSize = async (uri: string) => {
+        try {
+          const stats = await FileSystem.getInfoAsync(uri, { size: true });
+          if (stats.exists && !stats.isDirectory) {
+            return stats.size || 0; // Return size if it exists
+          } else {
+            console.error('File does not exist or is a directory');
+            return 0;
+          }
+        } catch (err) {
+          console.error('Error getting file size:', err);
+          return 0;
+        }
+      };
+      
   
     const handleCardPress = (food: FoodItem) => {
       setSelectedFood(food);
