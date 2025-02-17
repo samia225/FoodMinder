@@ -55,6 +55,7 @@ const chartConfig = {
     fontSize: 12,
   },
   fromZero: true,
+
 };
 
 const PAGES = [
