@@ -17,18 +17,33 @@ function RootLayoutNav() {
   useEffect(() => {
     // Immediately redirect to login if no user
     if (!user) {
-      router.replace('/auth/LoginScreen');
+      router.replace('/auth/LoginScreen'); // Changed from LoginScreen to match Screen name
     } else {
-      router.replace('/(tabs)');
+      router.replace('/storage'); // Changed from /(tabs) to direct tab route
     }
   }, [user]);
 
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="auth/login" />
-        <Stack.Screen name="auth/signup" />
+        <Stack.Screen 
+          name="(tabs)" 
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="auth/login" 
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="auth/signup" 
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </>
