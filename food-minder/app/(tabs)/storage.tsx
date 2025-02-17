@@ -22,27 +22,48 @@ type FoodItem = {
 
 // Sample data with visible field
 const initialData: FoodItem[] = [
-  { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-19", price: 1.2, visible: true },
+{ id: "13", emoji: "🍅", name: "Tomatoes", expiryDate: "2025-02-18", price: 2.2, visible: true },
   { id: "2", emoji: "🥦", name: "Broccoli", expiryDate: "2025-02-19", price: 2.5, visible: true },
   { id: "3", emoji: "🥛", name: "Milk", expiryDate: "2025-02-19", price: 1.8, visible: true },
-  { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-19", price: 2.0, visible: true },
   { id: "6", emoji: "🍌", name: "Banana", expiryDate: "2025-02-18", price: 1.1, visible: true },
   { id: "10", emoji: "🍊", name: "Orange", expiryDate: "2025-02-19", price: 1.4, visible: true },
+  { id: "11", emoji: "🌾", name: "Flour", expiryDate: "2025-08-01", price: 3.0, visible: true },
+  { id: "12", emoji: "🧀", name: "Cheese", expiryDate: "2025-03-10", price: 4.5, visible: true },
 ];
 
 // Card Component
-const Card: React.FC<{ emoji: string; name: string; expiryDate: string; onPress: () => void }> = ({
-  emoji,
-  name,
-  expiryDate,
-  onPress,
-}) => (
-  <TouchableOpacity style={styles.card} onPress={onPress}>
-    <Text style={styles.emoji}>{emoji}</Text>
-    <Text style={styles.foodName} numberOfLines={1}>{name}</Text>
-    <Text style={styles.expiryDate}>Expires: {expiryDate}</Text>
-  </TouchableOpacity>
-);
+const Card: React.FC<{ 
+    emoji: string; 
+    name: string; 
+    expiryDate: string; 
+    onPress: () => void; 
+    onLongPress: () => void;
+    isSelected: boolean;
+    multiSelectMode: boolean;
+  }> = ({
+    emoji,
+    name,
+    expiryDate,
+    onPress,
+    onLongPress,
+    isSelected,
+    multiSelectMode
+  }) => (
+    <TouchableOpacity 
+      style={[styles.card, isSelected && styles.selectedCard]} 
+      onPress={onPress} 
+      onLongPress={onLongPress}
+    >
+      <Text style={styles.emoji}>{emoji}</Text>
+      <Text style={styles.foodName} numberOfLines={1}>{name}</Text>
+      <Text style={styles.expiryDate}>Expires: {expiryDate}</Text>
+      {isSelected && multiSelectMode && (
+        <View style={styles.checkmarkOverlay}>
+          <Text style={styles.checkmarkText}>✓</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 
 // Main Card Screen
 const CardScreen: React.FC = () => {
@@ -56,6 +77,11 @@ const CardScreen: React.FC = () => {
 
     const genimiAPIKey = "AIzaSyDENZrKT6lMsJid51Xh19GpSF3iQOrZjHU";
 
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [multiSelectMode, setMultiSelectMode] = useState(false);
+    const [multiSelectOkay, setMultiSelectOkay] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+
 
     const [extractedText, setExtractedText] = useState('');
     const [loading, setLoading] = useState(false);
@@ -63,6 +89,53 @@ const CardScreen: React.FC = () => {
     const [checkmarkVisible, setCheckmarkVisible] = useState(false); // State to control checkmark visibility
     const [checkmarkAnim] = useState(new Animated.Value(0)); // Animated value for the checkmark
   
+    const handleCardPress = (food: FoodItem) => {
+        if (multiSelectMode) {
+          // In multi-select mode, toggle item selection
+          setSelectedItems(prev => 
+            prev.includes(food.id) 
+              ? prev.filter(id => id !== food.id)
+              : [...prev, food.id]
+          );
+        } else {
+          // Normal mode - show food detail modal
+          setSelectedFood(food);
+        }
+      };
+    
+      const handleLongPress = (food: FoodItem) => {
+        if (!multiSelectMode) {
+          setMultiSelectMode(true);
+          setSelectedItems([food.id]);
+        }
+      };
+    
+      const handleGenerateReceipt = () => {
+        // Calculate total price of selected items
+      };
+    
+      const renderFoodList = (items: FoodItem[]) => (
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          renderItem={({ item }) => (
+            <Card 
+              emoji={item.emoji} 
+              name={item.name} 
+              expiryDate={item.expiryDate} 
+              onPress={() => handleCardPress(item)}
+              onLongPress={() => handleLongPress(item)}
+              isSelected={selectedItems.includes(item.id)}
+              multiSelectMode={multiSelectMode}
+            />
+          )}
+          contentContainerStyle={styles.listContainer}
+          scrollEnabled={false}
+        />
+      );
+    
+
     const getDaysLeft = (expiryDate: string) => {
       const today = new Date();
       const expiry = new Date(expiryDate);
@@ -219,9 +292,6 @@ const CardScreen: React.FC = () => {
       };
       
   
-    const handleCardPress = (food: FoodItem) => {
-      setSelectedFood(food);
-    };
   
     const handleCloseModal = () => {
       setSelectedFood(null);
@@ -294,40 +364,13 @@ const CardScreen: React.FC = () => {
         </View>
         <ScrollView contentContainerStyle={{ padding: 5 }}>
           {items1Day.length > 0 && <Text style={styles.sectionHeader}>1 Day Left</Text>}
-          <FlatList
-            data={items1Day}
-            keyExtractor={(item) => item.id}
-            numColumns={3}
-            renderItem={({ item }) => (
-              <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} onPress={() => handleCardPress(item)} />
-            )}
-            contentContainerStyle={styles.listContainer}
-            scrollEnabled={false}
-          />
-  
+          {renderFoodList(items1Day)}
+
           {items2Days.length > 0 && <Text style={styles.sectionHeader}>2 Days Left</Text>}
-          <FlatList
-            data={items2Days}
-            keyExtractor={(item) => item.id}
-            numColumns={3}
-            renderItem={({ item }) => (
-              <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} onPress={() => handleCardPress(item)} />
-            )}
-            contentContainerStyle={styles.listContainer}
-            scrollEnabled={false}
-          />
-  
+          {renderFoodList(items2Days)}
+
           {items3OrMore.length > 0 && <Text style={styles.sectionHeader}>3+ Days Left</Text>}
-          <FlatList
-            data={items3OrMore}
-            keyExtractor={(item) => item.id}
-            numColumns={3}
-            renderItem={({ item }) => (
-              <Card emoji={item.emoji} name={item.name} expiryDate={item.expiryDate} onPress={() => handleCardPress(item)} />
-            )}
-            contentContainerStyle={styles.listContainer}
-            scrollEnabled={false}
-          />
+          {renderFoodList(items3OrMore)}
         </ScrollView>
   
         <TouchableOpacity style={styles.floatingButton} onPress={openCamera}>
@@ -374,7 +417,47 @@ const CardScreen: React.FC = () => {
           <Text>Loading...</Text>
         </View>
       )}
+
+{multiSelectMode && (
+          <View style={styles.multiSelectHeader}>
+            <Text style={styles.selectedCount}>{selectedItems.length} items selected</Text>
+            <TouchableOpacity 
+              style={styles.okayButton} 
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.okayButtonText}>Okay</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
+
+              {/* Receipt Generation Modal */}
+    <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.modalGenerateContainer}>
+            <View style={styles.modalGenerateContent}>
+              <Text style={styles.modalTitle}>Generate recipe</Text>
+              <Text style={styles.modalText}>Generate recipe for {selectedItems.length} selected food?</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.confirmButton]} 
+                  onPress={handleGenerateReceipt}
+                >
+                  <Text style={styles.modalButtonText}>Confirm</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.cancelButton]} 
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     );
   };
@@ -513,5 +596,102 @@ safeContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.7)', // Add a semi-transparent background
+  },
+  selectedCard: {
+    borderWidth: 2,
+    borderColor: '#4CAF50',
+  },
+  checkmarkOverlay: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: '#4CAF50',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmarkText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  multiSelectHeader: {
+    position: 'absolute', // Fixed positioning
+    top: 0, // Sticks it to the top
+    left: 0, // Ensures it sticks from the left edge
+    right: 0, // Ensures it spans the full width of the screen
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#f8f9fa',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+    zIndex: 10, // Make sure it's on top of other elements
+  },
+  selectedCount: {
+    fontSize: 16,
+    color: '#495057',
+  },
+  okayButton: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  okayButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalGenerateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalGenerateContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  modalButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  confirmButton: {
+    backgroundColor: '#4CAF50',
+    marginRight: 10,
+  },
+  cancelButton: {
+    backgroundColor: '#f44336',
+    marginLeft: 10,
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
