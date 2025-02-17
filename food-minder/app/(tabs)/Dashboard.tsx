@@ -1,12 +1,17 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Avatar, Button } from 'react-native-paper';
-import { SafeAreaView } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Avatar } from "react-native-paper";
+import { SafeAreaView } from "react-native";
+import ItemList from "@/components/ItemList";
 
 const Dashboard: React.FC = () => {
-  const userName: string = "Mike"; // Example, replace with state/context
-  const remainingBudget: string = "$120.50"; // Example, replace with actual data
-  const expiringItems: string[] = ["Milk", "Bread", "Cheese"]; // Example items
+  const userName: string = "Mike"; 
+  const remainingBudget: string = "$120.50"; 
+  const [items, setItems] = useState<string[]>(["Milk", "Bread", "Cheese"]);
+
+  const addItem = () => {
+    setItems([...items, `Item ${items.length + 1}`]);
+  };
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -20,17 +25,7 @@ const Dashboard: React.FC = () => {
         </View>
 
         {/* Expiring Items Section */}
-        <Text style={styles.sectionTitle}>Items expiring today:</Text>
-        <FlatList
-          data={expiringItems}
-          renderItem={({ item }) => <Text style={styles.item}>{item}</Text>}
-          keyExtractor={(item, index) => index.toString()}
-        />
-
-        {/* View All Button */}
-        <Button mode="contained" onPress={() => console.log("View All Clicked")} style={styles.button}>
-          View All
-        </Button>
+        <ItemList items={items} addItem={addItem} />
 
         {/* Remaining Budget */}
         <Text style={styles.budgetText}>Remaining Budget: {remainingBudget}</Text>
@@ -43,13 +38,13 @@ const Dashboard: React.FC = () => {
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#FADA7A",
   },
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 50,  // Adjust as needed
-    paddingBottom: 30,  // Adjust as needed
+    paddingTop: 50,
+    paddingBottom: 30,
   },
   header: {
     flexDirection: "row",
@@ -60,18 +55,6 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 22,
     fontWeight: "bold",
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  item: {
-    fontSize: 16,
-    padding: 5,
-  },
-  button: {
-    marginTop: 10,
   },
   budgetText: {
     fontSize: 18,
