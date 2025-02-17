@@ -15,10 +15,10 @@ type FoodItem = {
 
 // Sample data with visible field
 const initialData: FoodItem[] = [
-  { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-17", price: 1.2, visible: true },
+  { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-18", price: 1.2, visible: true },
   { id: "2", emoji: "🥦", name: "Broccoli", expiryDate: "2025-02-18", price: 2.5, visible: true },
   { id: "3", emoji: "🥛", name: "Milk", expiryDate: "2025-02-19", price: 1.8, visible: true },
-  { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-17", price: 2.0, visible: true },
+  { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-18", price: 2.0, visible: true },
   { id: "5", emoji: "🍗", name: "Chicken", expiryDate: "2025-02-20", price: 5.0, visible: true },
   { id: "6", emoji: "🍌", name: "Banana", expiryDate: "2025-02-18", price: 1.1, visible: true },
   { id: "7", emoji: "🥕", name: "Carrot", expiryDate: "2025-02-21", price: 1.3, visible: true },
@@ -261,6 +261,7 @@ safeContainer: {
     height: 40,
     paddingHorizontal: 10,
     marginBottom: 10,
+    fontSize: 30,
   },
   searchBar: {
     height: 40,
