@@ -43,6 +43,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FontAwesome6 name="bowl-food" size={24} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="analysis"
+        options={{
+          title: 'Analysis',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="archivebox.fill" color={color} />,
+        }}
+      /> 
     </Tabs>
+    
   );
 }
