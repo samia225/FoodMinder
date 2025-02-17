@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
 type FoodItem = {
@@ -18,11 +18,19 @@ type FoodItemDetailProps = {
   onSave: (updatedFoodItem: FoodItem) => void;
 };
 
+const donationCenters = [
+  { id: '1', name: 'Edmonton Food Bank', address: '11508 120 St NW, Edmonton, AB' },
+  { id: '2', name: 'The Mustard Seed', address: '10635 96 St NW, Edmonton, AB' },
+  { id: '3', name: 'WIN House', address: '10909 103 St NW, Edmonton, AB' },
+  { id: '4', name: 'Hope Mission', address: '9908 106 Ave NW, Edmonton, AB' },
+];
+
 const FoodItemDetail: React.FC<FoodItemDetailProps> = ({ foodItem, onClose, onConsumed, onDisposed, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editableName, setEditableName] = useState(foodItem.name);
   const [editablePrice, setEditablePrice] = useState(foodItem.price.toString());
   const [editableExpiryDate, setEditableExpiryDate] = useState(foodItem.expiryDate);
+  const [showDonationList, setShowDonationList] = useState(false);
 
   const toggleEdit = () => {
     if (isEditing) {
@@ -34,6 +42,10 @@ const FoodItemDetail: React.FC<FoodItemDetailProps> = ({ foodItem, onClose, onCo
       });
     }
     setIsEditing(!isEditing);
+  };
+
+  const toggleDonationList = () => {
+    setShowDonationList(!showDonationList);
   };
 
   return (
@@ -67,6 +79,28 @@ const FoodItemDetail: React.FC<FoodItemDetailProps> = ({ foodItem, onClose, onCo
         ) : (
           <Text style={styles.price}>Price: ${foodItem.price}</Text>
         )}
+        
+        {/* Donation Button */}
+        <TouchableOpacity style={styles.buttonDonation} onPress={toggleDonationList}>
+          <Text style={styles.buttonText}>Donation</Text>
+        </TouchableOpacity>
+
+        {/* Donation Centers List */}
+        {showDonationList && (
+          <View style={styles.donationList}>
+            <FlatList
+              data={donationCenters}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.donationItem}>
+                  <Text style={styles.donationName}>{item.name}</Text>
+                  <Text style={styles.donationAddress}>{item.address}</Text>
+                </View>
+              )}
+            />
+          </View>
+        )}
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.buttonConsumed} onPress={onConsumed}>
             <Text style={styles.buttonText}>Consumed</Text>
@@ -166,9 +200,34 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     alignItems: "center",
   },
+  buttonDonation: {
+    backgroundColor: "#56C1A5",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    alignItems: "center",
+  },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  donationList: {
+    marginTop: 10,
+    width: "80%",
+  },
+  donationItem: {
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  donationName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  donationAddress: {
+    fontSize: 14,
+    color: "#555",
   },
 });
 
