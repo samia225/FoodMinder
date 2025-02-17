@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, FlatList, StyleSheet, TextInput, TouchableOpacity, Modal, Button, Animated, SafeAreaView} from "react-native";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+//import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import { Camera } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import FoodItemDetail from "../../components/FoodItemDetail"; // Import the new component
 
 // Define food item type
@@ -46,6 +48,10 @@ const Card: React.FC<{ emoji: string; name: string; expiryDate: string; onPress:
 
 // Main Card Screen
 const CardScreen: React.FC = () => {
+
+    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+    const [cameraOpen, setCameraOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
     const [data, setData] = useState<FoodItem[]>(initialData);
@@ -68,21 +74,47 @@ const CardScreen: React.FC = () => {
     const items2Days = sortedData.filter((item) => getDaysLeft(item.expiryDate) === 2 && item.visible);
     const items3OrMore = sortedData.filter((item) => getDaysLeft(item.expiryDate) >= 3 && item.visible);
   
-    const openCamera = () => {
-      launchCamera({ mediaType: "photo" }, (response) => {
-        if (response.assets) {
-          console.log(response.assets[0].uri);
+    useEffect(() => {
+        (async () => {
+          const { status } = await Camera.requestCameraPermissionsAsync();
+          setHasPermission(status === "granted");
+        })();
+      }, []);
+    
+      const openCamera = async () => {
+        if (hasPermission === null) {
+          return;
         }
-      });
-    };
-  
-    const openGallery = () => {
-      launchImageLibrary({ mediaType: "photo" }, (response) => {
-        if (response.assets) {
-          console.log(response.assets[0].uri);
+        if (hasPermission === false) {
+          alert("No access to camera");
+          return;
         }
-      });
-    };
+        
+        let result = await ImagePicker.launchCameraAsync({
+          mediaTypes: 'images',
+          allowsEditing: true,
+          quality: 1,
+        });
+    
+        if (!result.canceled) {
+          setSelectedImage(result.assets[0].uri);
+          console.log(result.assets[0].uri);
+        }
+      };
+    
+      const openGallery = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: 'images',
+          allowsEditing: true,
+          quality: 1,
+        });
+    
+        if (!result.canceled) {
+          setSelectedImage(result.assets[0].uri);
+          console.log(result.assets[0].uri);
+        }
+      };
+    
   
     const handleCardPress = (food: FoodItem) => {
       setSelectedFood(food);
