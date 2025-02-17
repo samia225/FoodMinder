@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocalSearchParams } from 'expo-router';
 import {
   View,
   Text,
@@ -266,11 +267,29 @@ const RECIPES: Recipe[] = [
 
 export default function RecipeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
+  const params = useLocalSearchParams();
+
+  // Access the parameters
+  console.log(params);
+  const { recipeId = null } = params;
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   const filteredRecipes = RECIPES.filter(recipe =>
     recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  console.log(recipeId);
+    // Find the recipe by its ID
+  useEffect(() => {
+    console.log("Params received:", params);
+    if (recipeId) {
+      const recipe = RECIPES.find((recipe) => recipe.id === recipeId);
+      if (recipe) {
+        setSelectedRecipe(recipe);
+      }
+      console.log("Selected recipe:", recipe);
+    }
+  }, [recipeId]); // Only run when id changes
 
   return (
     <ScrollView style={styles.container}>

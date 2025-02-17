@@ -8,6 +8,7 @@ import FoodItemDetail from "../../components/FoodItemDetail"; // Import the new 
 import * as ImageManipulator from 'expo-image-manipulator';
 import {Alert} from 'react-native';
 import { ActivityIndicator } from "react-native"; // Import the ActivityIndicator
+import { Stack, router } from 'expo-router';
 
 
 // Define food item type
@@ -112,6 +113,15 @@ const CardScreen: React.FC = () => {
     
       const handleGenerateReceipt = () => {
         // Calculate total price of selected items
+        setModalVisible(false);
+        setMultiSelectMode(false);
+        setSelectedItems([]);
+        router.replace({
+            pathname: '/(tabs)/recipes',
+            params: {
+            recipeId: "1"
+            }
+          });
       };
     
       const renderFoodList = (items: FoodItem[]) => (
@@ -450,7 +460,11 @@ const CardScreen: React.FC = () => {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.modalButton, styles.cancelButton]} 
-                  onPress={() => setModalVisible(false)}
+                  onPress={() => {
+                    setModalVisible(false);
+                    setMultiSelectMode(false);
+                    setSelectedItems([]);
+                  }}
                 >
                   <Text style={styles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
