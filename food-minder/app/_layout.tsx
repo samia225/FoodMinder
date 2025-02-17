@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { AuthProvider, useAuth } from './contexts/auth';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Redirect } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,13 +14,22 @@ function RootLayoutNav() {
   const { user } = useAuth();
   const colorScheme = useColorScheme();
 
-  if (!user) {
-    return <Redirect href="./auth/login" />;
-  }
+  useEffect(() => {
+    // Immediately redirect to login if no user
+    if (!user) {
+      router.replace('/auth/LoginScreen');
+    } else {
+      router.replace('/(tabs)');
+    }
+  }, [user]);
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="auth/login" />
+        <Stack.Screen name="auth/signup" />
+      </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </>
   );
