@@ -65,7 +65,7 @@ const FoodItemDetail: React.FC<FoodItemDetailProps> = ({ foodItem, onClose, onCo
             keyboardType="numeric"
           />
         ) : (
-          <Text style={styles.price}>Price: ${foodItem.price.toFixed(2)}</Text>
+          <Text style={styles.price}>Price: ${foodItem.price}</Text>
         )}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.buttonConsumed} onPress={onConsumed}>

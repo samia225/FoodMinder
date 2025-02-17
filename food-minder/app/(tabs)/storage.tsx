@@ -7,6 +7,7 @@ import * as FileSystem from "expo-file-system"; // Import for FileSystem to read
 import FoodItemDetail from "../../components/FoodItemDetail"; // Import the new component
 import * as ImageManipulator from 'expo-image-manipulator';
 import {Alert} from 'react-native';
+import { ActivityIndicator } from "react-native"; // Import the ActivityIndicator
 
 
 // Define food item type
@@ -21,19 +22,12 @@ type FoodItem = {
 
 // Sample data with visible field
 const initialData: FoodItem[] = [
-  { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-18", price: 1.2, visible: true },
-  { id: "2", emoji: "🥦", name: "Broccoli", expiryDate: "2025-02-18", price: 2.5, visible: true },
+  { id: "1", emoji: "🍎", name: "Apple", expiryDate: "2025-02-19", price: 1.2, visible: true },
+  { id: "2", emoji: "🥦", name: "Broccoli", expiryDate: "2025-02-19", price: 2.5, visible: true },
   { id: "3", emoji: "🥛", name: "Milk", expiryDate: "2025-02-19", price: 1.8, visible: true },
-  { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-18", price: 2.0, visible: true },
-  { id: "5", emoji: "🍗", name: "Chicken", expiryDate: "2025-02-20", price: 5.0, visible: true },
+  { id: "4", emoji: "🍞", name: "Bread", expiryDate: "2025-02-19", price: 2.0, visible: true },
   { id: "6", emoji: "🍌", name: "Banana", expiryDate: "2025-02-18", price: 1.1, visible: true },
-  { id: "7", emoji: "🥕", name: "Carrot", expiryDate: "2025-02-21", price: 1.3, visible: true },
-  { id: "8", emoji: "🍇", name: "Grapes", expiryDate: "2025-02-22", price: 3.0, visible: true },
-  { id: "9", emoji: "🥚", name: "Eggs", expiryDate: "2025-02-25", price: 2.5, visible: true },
   { id: "10", emoji: "🍊", name: "Orange", expiryDate: "2025-02-19", price: 1.4, visible: true },
-  { id: "11", emoji: "🥩", name: "Beef", expiryDate: "2025-02-20", price: 6.0, visible: true },
-  { id: "12", emoji: "🧀", name: "Cheese", expiryDate: "2025-02-28", price: 4.5, visible: true },
-  { id: "13", emoji: "🍉", name: "Watermelon", expiryDate: "2025-02-26", price: 5.5, visible: true },
 ];
 
 // Card Component
@@ -167,6 +161,7 @@ const CardScreen: React.FC = () => {
                 const data = JSON.parse(jsonData);
                 console.log(data);
                 setData((prevData) => [...prevData, ...data]);
+                console.log(data);
             }
         }
         }
@@ -372,6 +367,13 @@ const CardScreen: React.FC = () => {
             <Text >Finished</Text> 
           </Animated.View>
         )}
+        {/* Loading Modal */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading...</Text>
+        </View>
+      )}
       </View>
       </SafeAreaView>
     );
@@ -501,5 +503,15 @@ safeContainer: {
   checkmark: {
     fontSize: 40,
     color: "green",
-  }
+  },
+  loadingContainer: {
+    position: 'absolute', // Ensures the loading screen overlays the entire screen
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Add a semi-transparent background
+  },
 });
